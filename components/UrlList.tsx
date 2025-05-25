@@ -32,7 +32,6 @@ const UrlList = () => {
 				},
 			});
 			const data = await response.json();
-			console.log("Fetched URLs:", data);
 			setUrls(data);
 		} catch (error) {
 			console.error("Error fetching URLs:", error);
