@@ -11,6 +11,10 @@ const ShortenForm = ({ handleUrlShortener }: ShortenFormProps) => {
 	const [url, setUrl] = useState<string>("");
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
+	const shortenedUrl = (slug: string) => {
+		return `${process.env.NEXT_PUBLIC_BASE_URL}/${slug}`;
+	};
+
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		setIsLoading(true);
@@ -29,7 +33,23 @@ const ShortenForm = ({ handleUrlShortener }: ShortenFormProps) => {
 				body: JSON.stringify({ url }),
 			});
 
-			await response.json();
+			const data = await response.json();
+
+			if (response.ok && data.shortCode) {
+				console.log("Shortened URL:", data.shortCode);
+				try {
+					await navigator.clipboard.writeText(
+						shortenedUrl(data.shortCode)
+					);
+				} catch (clipboardError) {
+					console.error(
+						"Failed to copy to clipboard:",
+						clipboardError
+					);
+				}
+			} else {
+				console.error("Error shortening URL:", data);
+			}
 			setUrl("");
 			handleUrlShortener();
 		} catch (error) {
