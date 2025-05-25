@@ -35,8 +35,15 @@ const ShortenForm = ({ handleUrlShortener }: ShortenFormProps) => {
 
 			const data = await response.json();
 
+			if (response.status === 429) {
+				throw new Error("Rate limit exceeded. Please try again later.");
+			}
+
+			if (!response.ok) {
+				throw new Error(data.error || "Failed to shorten URL");
+			}
+
 			if (response.ok && data.shortCode) {
-				console.log("Shortened URL:", data.shortCode);
 				try {
 					await navigator.clipboard.writeText(
 						shortenedUrl(data.shortCode)
@@ -47,13 +54,12 @@ const ShortenForm = ({ handleUrlShortener }: ShortenFormProps) => {
 						clipboardError
 					);
 				}
-			} else {
-				console.error("Error shortening URL:", data);
 			}
+
 			setUrl("");
 			handleUrlShortener();
 		} catch (error) {
-			console.error("Error shortening URL:", error);
+			console.error("Error:", error);
 		} finally {
 			setIsLoading(false);
 		}
